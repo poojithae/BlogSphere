@@ -27,6 +27,8 @@ from django.contrib.auth import authenticate
 class BlogPostListCreateView(generics.ListCreateAPIView):
     queryset = BlogPost.objects.all()    
     serializer_class = BlogPostSerializer
+    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = BlogPostFilter
     ordering_fields = ['created_at', 'title']
@@ -35,6 +37,7 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
 class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostSerializer
+    permission_classes = [IsAuthenticated]
 
 class CommentListCreateView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()
@@ -86,6 +89,7 @@ class ReactionDetailView(generics.RetrieveDestroyAPIView):
 
 
 class RegisterView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         return RegisterSerializer
