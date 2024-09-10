@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'blog_manager.middleware.CustomMiddleware',
 ]
 
 ROOT_URLCONF = 'BlogSphere.urls'
@@ -146,9 +147,6 @@ REST_FRAMEWORK = {
     ),
 }
 
-
-
-# JWT settings (optional)
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),

@@ -89,7 +89,7 @@ class ReactionDetailView(generics.RetrieveDestroyAPIView):
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         return RegisterSerializer
