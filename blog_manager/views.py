@@ -28,7 +28,6 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
     queryset = BlogPost.objects.all()    
     serializer_class = BlogPostSerializer
     permission_classes = [IsAuthenticated]
-    permission_classes = [IsAuthenticated]
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = BlogPostFilter
     ordering_fields = ['created_at', 'title']
@@ -64,14 +63,14 @@ class ReactionListCreateView(generics.ListCreateAPIView):
         if self.request.method == 'POST':
             return [IsRegularUser() if not self.request.user.is_staff else IsAdminUser()]
         return [permissions.AllowAny()]
-    
+
     def perform_create(self, serializer):
-        # Ensure users can only create reactions on posts they can react to
         if not self.request.user.is_staff:
             post = serializer.validated_data['post']
             if post.author != self.request.user:
                 raise permissions.PermissionDenied("You do not have permission to react to this post.")
         serializer.save(user=self.request.user)
+
 
 class ReactionDetailView(generics.RetrieveDestroyAPIView):
     queryset = Reaction.objects.all()
@@ -89,6 +88,7 @@ class ReactionDetailView(generics.RetrieveDestroyAPIView):
 
 
 class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
@@ -108,7 +108,8 @@ class RegisterView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         return serializer.save()
-
+    
+    
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer

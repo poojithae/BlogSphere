@@ -76,20 +76,3 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
-class RegisterView(generics.CreateAPIView):
-    serializer_class = RegisterSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED, headers=headers)
-
-    def perform_create(self, serializer):
-        return serializer.save()
