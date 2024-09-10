@@ -3,7 +3,7 @@ import django
 from random import *
 from faker import Faker
 from django.contrib.auth.models import User
-from .models import BlogPost, Comment, Category, Tag, Reaction, UserProfile
+from blog_manager.models import BlogPost, Comment, Category, Tag, Reaction, UserProfile  
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'BlogSphere.settings')
 django.setup()
@@ -37,27 +37,27 @@ def create_blog_posts(users, categories, tags, num_posts=10):
         post = BlogPost.objects.create(
             title=fake.sentence(),
             content=fake.text(),
-            author=random.choice(users),
-            category=random.choice(categories) if random.choice([True, False]) else None
+            author=choice(users),
+            category=choice(categories) if choice([True, False]) else None
         )
-        post.tags.set(random.sample(tags, k=random.randint(1, 3)))
+        post.tags.set(sample(tags, k=randint(1, 3)))
 
 def create_comments(posts, users, num_comments=20):
     for _ in range(num_comments):
         Comment.objects.create(
-            post=random.choice(posts),
-            author=random.choice(users),
+            post=choice(posts),
+            author=choice(users),
             content=fake.text(),
-            status=random.choice(['pending', 'approved'])
+            status=choice(['pending', 'approved'])
         )
 
 def create_reactions(posts, users, num_reactions=30):
     reaction_types = ['like', 'love', 'angry', 'sad', 'wow']
     for _ in range(num_reactions):
         Reaction.objects.create(
-            user=random.choice(users),
-            post=random.choice(posts),
-            reaction_type=random.choice(reaction_types)
+            user=choice(users),
+            post=choice(posts),
+            reaction_type=choice(reaction_types)
         )
 
 def populate(n):

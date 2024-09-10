@@ -15,19 +15,23 @@ from .serializers import (
 
 )
 from .filters import BlogPostFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from blog_manager import permissions
 from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
 
 
-
+class BlogPostPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'blog_page'
+    max_page_size = 100
 
 class BlogPostListCreateView(generics.ListCreateAPIView):
     queryset = BlogPost.objects.all()    
     serializer_class = BlogPostSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = BlogPostPagination
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = BlogPostFilter
     ordering_fields = ['created_at', 'title']
@@ -89,7 +93,7 @@ class ReactionDetailView(generics.RetrieveDestroyAPIView):
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
-    #permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         return RegisterSerializer
@@ -108,7 +112,6 @@ class RegisterView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         return serializer.save()
-    
     
 
 class UserProfileView(generics.RetrieveUpdateAPIView):

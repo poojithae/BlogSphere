@@ -15,7 +15,7 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name']
 
-class ReactionSerializer(serializers.ModelSerializer):
+class ReactionSerializer(serializers.ModelSerializer):    
     class Meta:
         model = Reaction
         fields = ['id', 'user', 'post', 'reaction_type']
@@ -23,7 +23,7 @@ class ReactionSerializer(serializers.ModelSerializer):
 class BlogPostSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    reaction_type = ReactionSerializer(many=True, read_only=True)
+    reaction_type = ReactionSerializer(read_only=True, many=True)
     like_count = serializers.SerializerMethodField()
     love_count = serializers.SerializerMethodField()
     angry_count = serializers.SerializerMethodField()
