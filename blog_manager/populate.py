@@ -1,72 +1,90 @@
 import os
 import django
-from random import *
 from faker import Faker
+from random import *
 from django.contrib.auth.models import User
-from blog_manager.models import BlogPost, Comment, Category, Tag, Reaction, UserProfile  
+from .models import BlogPost, Comment, Category, Tag, Reaction, UserProfile
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'BlogSphere.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project_name.settings')
 django.setup()
 
-fake = Faker()
+faker = Faker()
 
-def create_users(num_users):
+def create_categories(num):
+    categories = []
+    for _ in range(num):
+        category = Category.objects.create(name=faker.word())
+        categories.append(category)
+    return categories
+
+def create_tags(num):
+    tags = []
+    for _ in range(num):
+        tag = Tag.objects.create(name=faker.word())
+        tags.append(tag)
+    return tags
+
+def create_users(num):
     users = []
-    for _ in range(num_users):
+    for _ in range(num):
         user = User.objects.create_user(
-            username=fake.user_name(),
-            password=fake.password(),
-            email=fake.email()
+            username=faker.user_name(),
+            password=faker.password(),
+            email=faker.email()
         )
         UserProfile.objects.create(
             user=user,
-            first_name=fake.first_name(),
-            last_name=fake.last_name(),
-            bio=fake.text()
+            first_name=faker.first_name(),
+            last_name=faker.last_name(),
+            bio=faker.text(),
+            profile_picture=faker.image_url()
         )
         users.append(user)
     return users
 
-def create_categories_and_tags():
-    categories = [Category.objects.create(name=fake.word()) for _ in range(5)]
-    tags = [Tag.objects.create(name=fake.word()) for _ in range(10)]
-    return categories, tags
-
-def create_blog_posts(users, categories, tags, num_posts=10):
-    for _ in range(num_posts):
-        post = BlogPost.objects.create(
-            title=fake.sentence(),
-            content=fake.text(),
+def create_blog_posts(num, users, categories, tags):
+    for _ in range(num):
+        blog_post = BlogPost.objects.create(
+            title=faker.sentence(),
+            content=faker.text(),
             author=choice(users),
-            category=choice(categories) if choice([True, False]) else None
+            category=choice(categories) if categories else None
         )
-        post.tags.set(sample(tags, k=randint(1, 3)))
+        blog_post.tags.set(choice(tags) for _ in range(randint(1, 5)))
 
-def create_comments(posts, users, num_comments=20):
-    for _ in range(num_comments):
+def create_comments(num, blog_posts, users):
+    for _ in range(num):
         Comment.objects.create(
-            post=choice(posts),
+            post=choice(blog_posts),
             author=choice(users),
-            content=fake.text(),
+            content=faker.text(),
             status=choice(['pending', 'approved'])
         )
 
-def create_reactions(posts, users, num_reactions=30):
-    reaction_types = ['like', 'love', 'angry', 'sad', 'wow']
-    for _ in range(num_reactions):
+def create_reactions(num, blog_posts, users):
+    for _ in range(num):
         Reaction.objects.create(
+            post=choice(blog_posts),
             user=choice(users),
-            post=choice(posts),
-            reaction_type=choice(reaction_types)
+            reaction_type=choice(['like', 'love', 'angry', 'sad', 'wow'])
         )
 
-def populate(n):
-    users = create_users(n)
-    categories, tags = create_categories_and_tags()
-    create_blog_posts(users, categories, tags)
-    posts = BlogPost.objects.all()
-    create_comments(posts, users)
-    create_reactions(posts, users)
+def populate_db():
+    num_categories = 10
+    num_tags = 10
+    num_users = 20
+    num_blog_posts = 50
+    num_comments = 100
+    num_reactions = 200
+
+    categories = create_categories(num_categories)
+    tags = create_tags(num_tags)
+    users = create_users(num_users)
+    create_blog_posts(num_blog_posts, users, categories, tags)
+    blog_posts = list(BlogPost.objects.all())
+    create_comments(num_comments, blog_posts, users)
+    create_reactions(num_reactions, blog_posts, users)
+    print("Database populated with fake data.")
 
 if __name__ == '__main__':
-    populate(10)
+    populate_db()

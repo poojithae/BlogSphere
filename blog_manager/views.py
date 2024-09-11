@@ -20,7 +20,16 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from blog_manager import permissions
 from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.cache import cache
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from .tasks import cache_blog_post, cache_user_profile
 
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+
+def get_blog_posts():
+    print("DATA COMING FROM DB")
+    return BlogPost.objects.all()
 
 class BlogPostPagination(PageNumberPagination):
     page_size = 10
@@ -37,10 +46,45 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
     ordering_fields = ['created_at', 'title']
     ordering = ['created_at']
 
+    def get(self, request, *args, **kwargs):
+        cache_key = f"{settings.KEY_PREFIX}_blog_post_list"
+        print(f"Checking cache for key: {cache_key}")
+
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            print("DATA COMING FROM CACHE")
+            return Response(cached_response)
+        else:
+            response = super().get(request, *args, **kwargs)
+            cache.set(cache_key, response.data, timeout=CACHE_TTL)
+            print("DATA COMING FROM DB")
+            return response
+        
+    def perform_create(self, serializer):
+        blog_post = serializer.save()
+        cache_blog_post.delay(blog_post.id)
+
+
 class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostSerializer
     permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        cache_key = f"{settings.KEY_PREFIX}_blog_post_detail_{kwargs['pk']}"
+        print(f"Checking cache for key: {cache_key}")
+
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            print("DATA COMING FROM CACHE")
+            return Response(cached_response)
+        else:
+            response = super().get(request, *args, **kwargs)
+            cache.set(cache_key, response.data, timeout=CACHE_TTL)
+            print("DATA COMING FROM DB")
+            return response
+        
+
 
 class CommentListCreateView(generics.ListCreateAPIView):
     queryset = Comment.objects.all()
@@ -74,6 +118,11 @@ class ReactionListCreateView(generics.ListCreateAPIView):
             if post.author != self.request.user:
                 raise permissions.PermissionDenied("You do not have permission to react to this post.")
         serializer.save(user=self.request.user)
+
+        cache_key = f"{settings.KEY_PREFIX}reaction_list"
+        cache.delete(cache_key)
+        print(f"Cache invalidated for key: {cache_key}")
+
 
 
 class ReactionDetailView(generics.RetrieveDestroyAPIView):
@@ -125,13 +174,26 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
              return None
 
     def get(self, request, *args, **kwargs):
-        user_profile = self.get_object()
-        if user_profile is None:
-            return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(user_profile)
-        return Response(serializer.data)
+        cache_key = f"{settings.KEY_PREFIX}user_profile_{self.request.user.id}"
+        print(f"Checking cache for key: {cache_key}")
+
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            print("DATA COMING FROM CACHE")
+            return Response(cached_response)
+        else:
+            print("DATA COMING FROM DB")
+            user_profile = self.get_object()
+            if user_profile is None:
+                return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
+            serializer = self.get_serializer(user_profile)
+            cache.set(cache_key, serializer.data, timeout=CACHE_TTL)
+            return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
+        cache_key = f"{settings.KEY_PREFIX}user_profile_{self.request.user.id}"
+        print(f"Checking cache for key: {cache_key}")
+
         user_profile = self.get_object()
         if user_profile is None:
             return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -139,3 +201,4 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+

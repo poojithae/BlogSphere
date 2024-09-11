@@ -12,6 +12,7 @@ from .views import (
     RegisterView 
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+
 urlpatterns = [
     path('blogposts/', BlogPostListCreateView.as_view(), name='blogpost-list-create'),
     path('blogposts/<int:pk>/', BlogPostDetailView.as_view(), name='blogpost-detail'),
