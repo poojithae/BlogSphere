@@ -5,7 +5,7 @@ from random import *
 from django.contrib.auth.models import User
 from .models import BlogPost, Comment, Category, Tag, Reaction, UserProfile
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project_name.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'BlogSphere.settings')
 django.setup()
 
 faker = Faker()

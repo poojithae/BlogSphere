@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'blog_manager.middleware.CustomMiddleware',
+    #'blog_manager.middleware.CustomMiddleware',
 ]
 
 ROOT_URLCONF = 'BlogSphere.urls'
@@ -148,6 +148,16 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',  
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '100/hour',    
+        'anon': '20/hour',  
+        'blog_categories' : '30/hour', 
+    },
+
 }
 
 
@@ -176,3 +186,6 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+#Silencing check in specific environments
+SILENCED_SYSTEM_CHECKS = ['blog_manager.E001']

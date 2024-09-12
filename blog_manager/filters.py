@@ -1,15 +1,20 @@
-import django_filters
+from django_filters import rest_framework as filters
 from .models import BlogPost
 
-class BlogPostFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method='^search_filter')
-    created_at = django_filters.DateFilter(field_name='created_at', lookup_expr='exact') 
-    author = django_filters.NumberFilter(field_name='author__id')
-    tags = django_filters.CharFilter(method='filter_tags')
+class BlogPostFilter(filters.FilterSet):
+    title = filters.CharFilter(lookup_expr='icontains')
+    author = filters.CharFilter(lookup_expr='icontains')
+    created_at = filters.DateFromToRangeFilter()
+    tags = filters.CharFilter(method='filter_tags')
+
+    # search = filters.CharFilter(method='^search_filter')
+    # created_at = filters.DateFilter(field_name='created_at', lookup_expr='exact') 
+    # author = filters.NumberFilter(field_name='author__id')
+    # tags = filters.CharFilter(method='filter_tags')
 
     class Meta:
         model = BlogPost
-        fields = []
+        fields = ['title', 'author', 'created_at', 'tags']
 
     def filter_search(self, queryset, name, value):
         return queryset.filter(

@@ -3,14 +3,14 @@ from .models import BlogPost, Comment, Category, Tag, Reaction, UserProfile
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'category', 'created_at', 'updated_at')
+    list_display = ('id', 'title', 'author', 'category', 'created_at', 'updated_at')
     search_fields = ('title', 'content', 'author__username', 'category__name')
     list_filter = ('author', 'category', 'created_at')
     ordering = ('-created_at',)
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('post', 'author', 'status', 'created_at')
+    list_display = ('id', 'post', 'author', 'status', 'created_at')
     search_fields = ('content', 'author__username', 'post__title')
     list_filter = ('status', 'post', 'author')
     ordering = ('-created_at',)

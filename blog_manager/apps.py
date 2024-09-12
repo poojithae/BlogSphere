@@ -7,4 +7,5 @@ class BlogManagerConfig(AppConfig):
 
     def ready(self):
         import blog_manager.signals
+        import blog_manager.checks 
 

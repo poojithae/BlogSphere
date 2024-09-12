@@ -17,6 +17,7 @@ from .serializers import (
 from .filters import BlogPostFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
+#from rest_framework.authentication import BaseAuthentication
 from blog_manager import permissions
 from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -24,6 +25,7 @@ from django.core.cache import cache
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from .tasks import cache_blog_post, cache_user_profile
+from rest_framework.throttling import ScopedRateThrottle
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
@@ -33,18 +35,21 @@ def get_blog_posts():
 
 class BlogPostPagination(PageNumberPagination):
     page_size = 10
-    page_size_query_param = 'blog_page'
-    max_page_size = 100
+    # page_size_query_param = 'blog_page'
+    # max_page_size = 100
 
 class BlogPostListCreateView(generics.ListCreateAPIView):
-    queryset = BlogPost.objects.all()    
+    queryset = BlogPost.objects.all().order_by('-created_at')
     serializer_class = BlogPostSerializer
-    permission_classes = [IsAuthenticated]
     pagination_class = BlogPostPagination
+    #authentication_classes = [BaseAuthentication,]
+    permission_classes = [IsAuthenticated]
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = BlogPostFilter
     ordering_fields = ['created_at', 'title']
     ordering = ['created_at']
+    throttle_scope = 'blog_categories'
+    throttle_classes = [ScopedRateThrottle,]
 
     def get(self, request, *args, **kwargs):
         cache_key = f"{settings.KEY_PREFIX}_blog_post_list"
@@ -69,6 +74,8 @@ class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostSerializer
     permission_classes = [IsAuthenticated]
+    throttle_scope = 'blog_categories'
+    throttle_classes = [ScopedRateThrottle,]
 
     def get(self, request, *args, **kwargs):
         cache_key = f"{settings.KEY_PREFIX}_blog_post_detail_{kwargs['pk']}"
