@@ -1,4 +1,6 @@
 from rest_framework import generics, filters
+from django.views import View
+from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -23,6 +25,8 @@ from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.conf import settings
+from elasticsearch_dsl.query import MultiMatch
+from .documents import BlogPostDocument
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from .tasks import cache_blog_post, cache_user_profile
 from rest_framework.throttling import ScopedRateThrottle
@@ -68,6 +72,32 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         blog_post = serializer.save()
         cache_blog_post.delay(blog_post.id)
+
+
+class SearchView(View):
+    def get(self, request, *args, **kwargs):
+        q = request.GET.get('q', '')
+        results = []
+
+        if q:
+            query = MultiMatch(query=q, fields=["title", "description"], fuzziness="AUTO")
+            search = BlogPostDocument.search().query('multi_match', query=query, fields=['title', 'content'])
+            response = search.execute()
+
+            results = [
+                    {
+                        'id': hit.id,
+                        'title': hit.title,
+                        'content': hit.content,
+                        'category': hit.category,
+                        'tags': hit.tags
+                    }
+                    for hit in response
+                ]
+
+        return JsonResponse({'results': results})
+    
+    
 
 
 class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):

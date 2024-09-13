@@ -42,8 +42,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_swagger',
     'django_filters',
     'blog_manager',
+    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
@@ -88,6 +90,17 @@ DATABASES = {
     }
 }
 
+# ELASTICSEARCH_DSL = {
+#     'default': {
+#         'hosts': 'localhost:9200'
+#     }
+# }
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://localhost:9200'  # Ensure the scheme (http/https) is included
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -160,6 +173,11 @@ REST_FRAMEWORK = {
 
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
 
 CACHE_TTL = 60 * 1500
 CACHES = {
@@ -171,6 +189,7 @@ CACHES = {
         },
     }
 }
+
 KEY_PREFIX = 'blog_app'
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
