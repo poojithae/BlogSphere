@@ -20,15 +20,6 @@ def cache_blog_post(blog_post_id):
     except BlogPost.DoesNotExist:
         print(f"Blog post with ID {blog_post_id} does not exist.")
 
-# @shared_task
-# def update_blog_post_cache(blog_post_id):
-#     try:
-#         blog_post = BlogPost.objects.get(id=blog_post_id)
-#         cache_key = f"{settings.KEY_PREFIX}_blog_post_detail_{blog_post_id}"
-#         cache.set(cache_key, blog_post, timeout=settings.CACHE_TTL)
-#         print(f"Cache updated for key: {cache_key}")
-#     except BlogPost.DoesNotExist:
-#         print(f"BlogPost with ID {blog_post_id} does not exist.")
 
 @shared_task
 def cache_user_profile(user_id):

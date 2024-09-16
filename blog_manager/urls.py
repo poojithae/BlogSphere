@@ -13,10 +13,6 @@ from .views import (
     SearchView 
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-from .feeds import LatestBlogPostsFeed, LatestBlogPostsAtomFeed
-from rest_framework_swagger.views import get_swagger_view
-
-schema_view = get_swagger_view(title='Swagger API for BlogSphere')
 
 
 urlpatterns = [
@@ -33,9 +29,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('userprofile/', UserProfileView.as_view(), name='userprofile'),
-    path('feeds/blogposts/', LatestBlogPostsFeed(), name='blogpost_feed'),
-    path('feeds/blogposts/atom/', LatestBlogPostsAtomFeed(), name='blogpost_feed_atom'),
     path('search/', SearchView.as_view(), name='search'),
-    path('docs/', schema_view),
     
 ]

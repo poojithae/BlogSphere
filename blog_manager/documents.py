@@ -29,6 +29,21 @@ class BlogPostDocument(Document):
     class Meta:
         index = 'posts'
 
+    def get_queryset(self):
+        """Not mandatory but useful for filtering or customizing queries."""
+        return super().get_queryset().select_related('category').prefetch_related('tags')
+
+    def prepare_category(self, instance):
+        """Prepare data for category field"""
+        return {
+            'name': instance.category.name if instance.category else None
+        }
+
+    def prepare_tags(self, instance):
+        """Prepare data for tags field"""
+        return [{'name': tag.name} for tag in instance.tags.all()]
+
+
 @registry.register_document
 class CategoryDocument(Document):
     class Index:
