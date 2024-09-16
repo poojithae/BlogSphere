@@ -25,7 +25,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.conf import settings
 from elasticsearch_dsl.query import MultiMatch
-from .documents import BlogPostDocument
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.throttling import ScopedRateThrottle
 
@@ -64,31 +63,6 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         blog_post = serializer.save()
         cache.delete(f"{settings.KEY_PREFIX}_blog_post_list")
-
-# class SearchView(View):
-#     def get(self, request, *args, **kwargs):
-#         q = request.GET.get('q', '')
-#         results = []
-
-#         if q:
-#             query = MultiMatch(query=q, fields=["title", "description"], fuzziness="AUTO")
-#             search = BlogPostDocument.search().query('multi_match', query=query, fields=['title', 'content'])
-#             response = search.execute()
-
-#             results = [
-#                     {
-#                         'id': hit.id,
-#                         'title': hit.title,
-#                         'content': hit.content,
-#                         'category': hit.category,
-#                         'tags': hit.tags
-#                     }
-#                     for hit in response
-#                 ]
-
-#         return JsonResponse({'results': results})
-    
-    
 
 
 class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):
