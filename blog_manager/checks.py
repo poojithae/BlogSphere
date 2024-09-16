@@ -19,7 +19,7 @@ def check_authentication_configuration(app_configs, **kwargs):
         warnings.append(
             Warning(
                 'The AUTHENTICATION_BACKENDS setting is not configured.',
-                hint='Add authentication backends to the AUTHENTICATION_BACKENDS setting.',
+                hint='Add authentication backends to the AUTHENTICATION_BACKENDS settings.',
                 id='blog_manager.W002',
             )
         )

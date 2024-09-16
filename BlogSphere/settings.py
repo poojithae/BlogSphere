@@ -45,18 +45,19 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'django_filters',
     'blog_manager',
-    'django_elasticsearch_dsl',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    #'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    #'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'blog_manager.middleware.CustomMiddleware',
+    'blog_manager.middleware.CustomMiddleware',
 ]
 
 ROOT_URLCONF = 'BlogSphere.urls'
@@ -87,18 +88,6 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# ELASTICSEARCH_DSL = {
-#     'default': {
-#         'hosts': 'localhost:9200'
-#     }
-# }
-
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'http://localhost:9200'  # Ensure the scheme (http/https) is included
     }
 }
 
@@ -164,39 +153,49 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle',  
+        'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'user': '100/hour',    
-        'anon': '20/hour',  
-        'blog_categories' : '30/hour', 
+        'anon': '20/hour', 
+        'blog_categories': '30/hour', 
     },
 
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
 
 
 
-CACHE_TTL = 60 * 1500
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient"
-        },
+    'default': {
+        #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        #'LOCATION': r'C:\Users\MinnuReddy\BlogSphere\cache',
+
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_blogpost',
+
+
     }
 }
-
+CACHE_TTL = 60 * 15 
 KEY_PREFIX = 'blog_app'
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379'
-CELERY_ACCEPT_CONTENT = ['application/json']
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
+
+
+# CACHE_MIDDLEWARE_ALIAS = 'default'  
+# CACHE_MIDDLEWARE_SECONDS = 60 * 10  
+# CACHE_MIDDLEWARE_KEY_PREFIX = '' 
+
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient"
+#         },
+#     }
+# }
 
 
 SIMPLE_JWT = {

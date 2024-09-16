@@ -19,7 +19,6 @@ from .serializers import (
 from .filters import BlogPostFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
-#from rest_framework.authentication import BaseAuthentication
 from blog_manager import permissions
 from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -28,25 +27,19 @@ from django.conf import settings
 from elasticsearch_dsl.query import MultiMatch
 from .documents import BlogPostDocument
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
-from .tasks import cache_blog_post, cache_user_profile
 from rest_framework.throttling import ScopedRateThrottle
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
-def get_blog_posts():
-    print("DATA COMING FROM DB")
-    return BlogPost.objects.all()
 
 class BlogPostPagination(PageNumberPagination):
     page_size = 10
-    # page_size_query_param = 'blog_page'
-    # max_page_size = 100
+    
 
 class BlogPostListCreateView(generics.ListCreateAPIView):
     queryset = BlogPost.objects.all().order_by('-created_at')
     serializer_class = BlogPostSerializer
     pagination_class = BlogPostPagination
-    #authentication_classes = [BaseAuthentication,]
     permission_classes = [IsAuthenticated]
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = BlogPostFilter
@@ -63,39 +56,37 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
         if cached_response:
             print("DATA COMING FROM CACHE")
             return Response(cached_response)
-        else:
-            response = super().get(request, *args, **kwargs)
-            cache.set(cache_key, response.data, timeout=CACHE_TTL)
-            print("DATA COMING FROM DB")
-            return response
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=CACHE_TTL)
+        print("DATA COMING FROM DB")
+        return response
         
     def perform_create(self, serializer):
         blog_post = serializer.save()
-        cache_blog_post.delay(blog_post.id)
+        cache.delete(f"{settings.KEY_PREFIX}_blog_post_list")
 
+# class SearchView(View):
+#     def get(self, request, *args, **kwargs):
+#         q = request.GET.get('q', '')
+#         results = []
 
-class SearchView(View):
-    def get(self, request, *args, **kwargs):
-        q = request.GET.get('q', '')
-        results = []
+#         if q:
+#             query = MultiMatch(query=q, fields=["title", "description"], fuzziness="AUTO")
+#             search = BlogPostDocument.search().query('multi_match', query=query, fields=['title', 'content'])
+#             response = search.execute()
 
-        if q:
-            query = MultiMatch(query=q, fields=["title", "description"], fuzziness="AUTO")
-            search = BlogPostDocument.search().query('multi_match', query=query, fields=['title', 'content'])
-            response = search.execute()
+#             results = [
+#                     {
+#                         'id': hit.id,
+#                         'title': hit.title,
+#                         'content': hit.content,
+#                         'category': hit.category,
+#                         'tags': hit.tags
+#                     }
+#                     for hit in response
+#                 ]
 
-            results = [
-                    {
-                        'id': hit.id,
-                        'title': hit.title,
-                        'content': hit.content,
-                        'category': hit.category,
-                        'tags': hit.tags
-                    }
-                    for hit in response
-                ]
-
-        return JsonResponse({'results': results})
+#         return JsonResponse({'results': results})
     
     
 
@@ -115,11 +106,20 @@ class BlogPostDetailView(generics.RetrieveUpdateDestroyAPIView):
         if cached_response:
             print("DATA COMING FROM CACHE")
             return Response(cached_response)
-        else:
-            response = super().get(request, *args, **kwargs)
-            cache.set(cache_key, response.data, timeout=CACHE_TTL)
-            print("DATA COMING FROM DB")
-            return response
+        response = super().get(request, *args, **kwargs)
+        cache.set(cache_key, response.data, timeout=CACHE_TTL)
+        print("DATA COMING FROM DB")
+        return response
+        
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        cache_key = f"{settings.KEY_PREFIX}_blog_post_detail_{self.kwargs['pk']}"
+        cache.delete(cache_key)
+
+    def perform_destroy(self, instance):
+        super().perform_destroy(instance)
+        cache_key = f"{settings.KEY_PREFIX}_blog_post_detail_{self.kwargs['pk']}"
+        cache.delete(cache_key)
         
 
 
@@ -211,24 +211,23 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
              return None
 
     def get(self, request, *args, **kwargs):
-        cache_key = f"{settings.KEY_PREFIX}user_profile_{self.request.user.id}"
+        cache_key = f"{settings.KEY_PREFIX}_user_profile_{self.request.user.id}"
         print(f"Checking cache for key: {cache_key}")
 
         cached_response = cache.get(cache_key)
         if cached_response:
             print("DATA COMING FROM CACHE")
             return Response(cached_response)
-        else:
-            print("DATA COMING FROM DB")
-            user_profile = self.get_object()
-            if user_profile is None:
-                return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
-            serializer = self.get_serializer(user_profile)
-            cache.set(cache_key, serializer.data, timeout=CACHE_TTL)
-            return Response(serializer.data)
+        user_profile = self.get_object()
+        if user_profile is None:
+            return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(user_profile)
+        cache.set(cache_key, serializer.data, timeout=CACHE_TTL)
+        print("DATA COMING FROM DB")
+        return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
-        cache_key = f"{settings.KEY_PREFIX}user_profile_{self.request.user.id}"
+        cache_key = f"{settings.KEY_PREFIX}_user_profile_{self.request.user.id}"
         print(f"Checking cache for key: {cache_key}")
 
         user_profile = self.get_object()
@@ -237,5 +236,6 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         serializer = self.get_serializer(user_profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        # Invalidate cache after update
+        cache.delete(cache_key)
         return Response(serializer.data)
-
