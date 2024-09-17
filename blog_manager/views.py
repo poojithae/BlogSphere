@@ -1,9 +1,6 @@
 from rest_framework import generics, filters
-from django.views import View
-from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import BlogPost, Comment, Category, Tag, Reaction, UserProfile
 from .serializers import (
@@ -24,12 +21,10 @@ from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.conf import settings
-from elasticsearch_dsl.query import MultiMatch
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.throttling import ScopedRateThrottle
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
-
 
 class BlogPostPagination(PageNumberPagination):
     page_size = 10

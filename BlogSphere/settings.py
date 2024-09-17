@@ -50,9 +50,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.cache.FetchFromCacheMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -163,39 +163,39 @@ REST_FRAMEWORK = {
 
 }
 
+# CACHES = {
+#     'default': {
+#         #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#         #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         #'LOCATION': r'C:\Users\MinnuReddy\BlogSphere\cache',
+#         'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+
+#         #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         #'LOCATION': 'cache_blogpost',
 
 
-
-CACHES = {
-    'default': {
-        #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        #'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        #'LOCATION': r'C:\Users\MinnuReddy\BlogSphere\cache',
-
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'cache_blogpost',
-
-
-    }
-}
-CACHE_TTL = 60 * 15 
-KEY_PREFIX = 'blog_app'
+#     }
+# }
+# CACHE_TTL = 60 * 15 
+# KEY_PREFIX = 'blog_app'
 
 
 # CACHE_MIDDLEWARE_ALIAS = 'default'  
 # CACHE_MIDDLEWARE_SECONDS = 60 * 10  
 # CACHE_MIDDLEWARE_KEY_PREFIX = '' 
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://127.0.0.1:6379/1",
-#         "OPTIONS": {
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient"
-#         },
-#     }
-# }
+CACHE_TTL = 60 * 15
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+        },
+        "KEY_PREFIX": "example"
+    }
+}
 
 
 SIMPLE_JWT = {
