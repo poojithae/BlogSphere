@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'blog_manager.middleware.CustomMiddleware',
+    #'blog_manager.middleware.CustomMiddleware',
 ]
 
 ROOT_URLCONF = 'BlogSphere.urls'
@@ -179,13 +179,13 @@ REST_FRAMEWORK = {
 # }
 # CACHE_TTL = 60 * 15 
 # KEY_PREFIX = 'blog_app'
-
-
 # CACHE_MIDDLEWARE_ALIAS = 'default'  
 # CACHE_MIDDLEWARE_SECONDS = 60 * 10  
 # CACHE_MIDDLEWARE_KEY_PREFIX = '' 
 
 CACHE_TTL = 60 * 15
+KEY_PREFIX = 'blog_app'
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -193,7 +193,6 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
-        "KEY_PREFIX": "example"
     }
 }
 

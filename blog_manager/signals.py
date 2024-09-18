@@ -1,51 +1,162 @@
-# from django.db.models.signals import pre_save, pre_delete, post_save, post_delete
-# from django.dispatch import receiver
-# from django.core.cache import cache
-# from django.conf import settings
-# from .models import BlogPost, Reaction
+from django.db.models.signals import (
+    pre_init, post_init, pre_save, pre_delete,
+    post_save, post_delete, pre_migrate, post_migrate
+)
+from django.contrib.auth.signals import (
+    user_logged_in, user_logged_out, user_login_failed
+)
+from django.dispatch import receiver
+from django.contrib.auth.models import User
+from .models import BlogPost
+from django.core.signals import (
+    request_started, request_finished, got_request_exception
+)
+from django.db.backends.signals import connection_created
 
-# @receiver(pre_save, sender=BlogPost)
-# def pre_save_blog_post(sender, instance, **kwargs):
-#     print(f"Preparing to save BlogPost instance: {instance}")
 
-# @receiver(pre_delete, sender=BlogPost)
-# def pre_delete_blog_post(sender, instance, **kwargs):
-#     print(f"Preparing to delete BlogPost instance: {instance}")
+# Authentication(login/logout) Signals
+@receiver(user_logged_in, sender=User)
+def handle_user_login(sender, request, user, **kwargs):
+    """Triggered when a user successfully logs in."""
+    print("---------------------")
+    print("User Login Successful")
+    print(f"User: {user.username} logged in.")
+    print(f"Request Path: {request.path}")
+    print(f"Additional Info: {kwargs}")
 
-# @receiver(post_save, sender=BlogPost)
-# def update_blog_post_cache(sender, instance, **kwargs):
-#     cache_key_list = f"{settings.KEY_PREFIX}_blog_post_list"
-#     cache_key_detail = f"{settings.KEY_PREFIX}_blog_post_detail_{instance.pk}"
-#     print(f"Invalidating cache for key: {cache_key_list}")
-#     cache.delete(cache_key_list)
-#     print(f"Invalidating cache for key: {cache_key_detail}")
-#     cache.delete(cache_key_detail)
 
-# @receiver(post_delete, sender=BlogPost)
-# def delete_blog_post_cache(sender, instance, **kwargs):
-#     cache_key_list = f"{settings.KEY_PREFIX}_blog_post_list"
-#     cache_key_detail = f"{settings.KEY_PREFIX}_blog_post_detail_{instance.pk}"
-#     print(f"Invalidating cache for key: {cache_key_list}")
-#     cache.delete(cache_key_list)
-#     print(f"Invalidating cache for key: {cache_key_detail}")
-#     cache.delete(cache_key_detail)
+@receiver(user_logged_out, sender=User)
+def handle_user_logout(sender, request, user, **kwargs):
+    """Triggered when a user logs out."""
+    print("---------------------")
+    print("User Logout")
+    print(f"User: {user.username} logged out.")
+    print(f"Request Path: {request.path}")
+    print(f"Additional Info: {kwargs}")
 
-# @receiver(pre_save, sender=Reaction)
-# def pre_save_reaction(sender, instance, **kwargs):
-#     print(f"Preparing to save Reaction instance: {instance}")
 
-# @receiver(pre_delete, sender=Reaction)
-# def pre_delete_reaction(sender, instance, **kwargs):
-#     print(f"Preparing to delete Reaction instance: {instance}")
+@receiver(user_login_failed)
+def handle_login_failure(sender, credentials, request, **kwargs):
+    """Triggered when a login attempt fails."""
+    print("---------------------")
+    print("User Login Failed")
+    print(f"Attempted Credentials: {credentials.get('username')}")
+    print(f"Request Path: {request.path}")
+    print(f"Additional Info: {kwargs}")
 
-# @receiver(post_save, sender=Reaction)
-# def update_reaction_cache(sender, instance, **kwargs):
-#     cache_key = f"{settings.KEY_PREFIX}reaction_list"
-#     print(f"Invalidating cache for key: {cache_key}")
-#     cache.delete(cache_key)
 
-# @receiver(post_delete, sender=Reaction)
-# def delete_reaction_cache(sender, instance, **kwargs):
-#     cache_key = f"{settings.KEY_PREFIX}reaction_list"
-#     print(f"Invalidating cache for key: {cache_key}")
-#     cache.delete(cache_key)
+# Model class Signals
+@receiver(pre_save, sender=BlogPost)
+def before_blog_post_save(sender, instance, **kwargs):
+    """Triggered before saving a BlogPost instance."""
+    print("---------------------")
+    print("About to Save BlogPost")
+    print(f"BlogPost Title: {instance.title}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(post_save, sender=BlogPost)
+def after_blog_post_save(sender, instance, created, **kwargs):
+    """Triggered after saving a BlogPost instance."""
+    action = "Created" if created else "Updated"
+    print("---------------------")
+    print(f"BlogPost {action}: {instance.title}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(pre_delete, sender=BlogPost)
+def before_blog_post_delete(sender, instance, **kwargs):
+    """Triggered before deleting a BlogPost instance."""
+    print("---------------------")
+    print("About to Delete BlogPost")
+    print(f"BlogPost Title: {instance.title}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(post_delete, sender=BlogPost)
+def after_blog_post_delete(sender, instance, **kwargs):
+    """Triggered after deleting a BlogPost instance."""
+    print("---------------------")
+    print(f"BlogPost Deleted: {instance.title}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(pre_init, sender=User)
+def before_user_init(sender, *args, **kwargs):
+    """Triggered before initializing a User instance."""
+    print("---------------------")
+    print("Initializing User Instance")
+    print(f"Sender: {sender}")
+    print(f"Additional Args: {args}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(post_init, sender=User)
+def after_user_init(sender, *args, **kwargs):
+    """Triggered after initializing a User instance."""
+    print("---------------------")
+    print("User Instance Initialized")
+    print(f"Sender: {sender}")
+    print(f"Additional Args: {args}")
+    print(f"Additional Info: {kwargs}")
+
+
+# Request/Response Signals
+@receiver(request_started)
+def on_request_started(sender, environ, **kwargs):
+    """Triggered when a request starts."""
+    print("---------------------")
+    print("Request Started")
+    print(f"Environment: {environ}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(request_finished)
+def on_request_finished(sender, **kwargs):
+    """Triggered when a request finishes."""
+    print("---------------------")
+    print("Request Finished")
+    print(f"Sender: {sender}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(got_request_exception)
+def on_request_exception(sender, request, **kwargs):
+    """Triggered when an exception occurs during request handling."""
+    print("---------------------")
+    print("Request Exception Occurred")
+    print(f"Request Path: {request.path}")
+    print(f"Additional Info: {kwargs}")
+
+
+# Management Signals
+@receiver(pre_migrate)
+def before_migrate(sender, app_config, verbosity, interactive, using, plan, apps, **kwargs):
+    """Triggered before migrations are applied."""
+    print("---------------------")
+    print("Before Migrate")
+    print(f"App: {app_config.name}")
+    print(f"Plan: {plan}")
+    print(f"Additional Info: {kwargs}")
+
+
+@receiver(post_migrate)
+def after_migrate(sender, app_config, verbosity, interactive, using, plan, apps, **kwargs):
+    """Triggered after migrations are applied."""
+    print("---------------------")
+    print("Migrations Completed")
+    print(f"App: {app_config.name}")
+    print(f"Plan: {plan}")
+    print(f"Additional Info: {kwargs}")
+
+
+# Database Connection Signals
+@receiver(connection_created)
+def on_database_connection_created(sender, connection, **kwargs):
+    """Triggered when a database connection is created."""
+    print("---------------------")
+    print("Database Connection Established")
+    print(f"Sender: {sender}")
+    print(f"Connection Details: {connection}")
+    print(f"Additional Info: {kwargs}")
+    

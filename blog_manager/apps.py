@@ -6,6 +6,6 @@ class BlogManagerConfig(AppConfig):
     name = 'blog_manager'
 
     def ready(self):
-        import blog_manager.signals
+        import blog_manager.signals 
         import blog_manager.checks 
 

@@ -20,6 +20,9 @@ from blog_manager import permissions
 from .permissions import IsAdminUser, IsAuthorOrAdmin, IsRegularUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.throttling import ScopedRateThrottle
@@ -42,6 +45,9 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
     throttle_scope = 'blog_categories'
     throttle_classes = [ScopedRateThrottle,]
 
+    
+    @method_decorator(cache_page(60 * 60))
+    @method_decorator(vary_on_headers("Authorization"))
     def get(self, request, *args, **kwargs):
         cache_key = f"{settings.KEY_PREFIX}_blog_post_list"
         print(f"Checking cache for key: {cache_key}")
