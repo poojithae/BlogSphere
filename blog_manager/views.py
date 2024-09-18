@@ -57,6 +57,7 @@ class BlogPostListCreateView(generics.ListCreateAPIView):
             print("DATA COMING FROM CACHE")
             return Response(cached_response)
         response = super().get(request, *args, **kwargs)
+        # Store in Redis cache
         cache.set(cache_key, response.data, timeout=CACHE_TTL)
         print("DATA COMING FROM DB")
         return response
