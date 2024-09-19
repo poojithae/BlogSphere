@@ -5,3 +5,8 @@ WARNING 2024-09-19 21:28:22,208 log 241 Method Not Allowed: /api/login/
 WARNING 2024-09-19 21:28:22,212 basehttp 212 "GET /api/login/ HTTP/1.1" 405 12588
 WARNING 2024-09-19 21:28:38,251 log 241 Unauthorized: /api/login/
 WARNING 2024-09-19 21:28:38,251 basehttp 212 "POST /api/login/ HTTP/1.1" 401 12528
+INFO 2024-09-19 21:43:57,811 autoreload 668 Watching for file changes with StatReloader
+INFO 2024-09-19 21:45:15,707 autoreload 266 C:\Users\MinnuReddy\BlogSphere\blog_manager\models.py changed, reloading.
+INFO 2024-09-19 21:45:18,033 autoreload 668 Watching for file changes with StatReloader
+INFO 2024-09-19 21:45:39,436 autoreload 266 C:\Users\MinnuReddy\BlogSphere\blog_manager\signals.py changed, reloading.
+INFO 2024-09-19 21:45:43,175 autoreload 668 Watching for file changes with StatReloader
