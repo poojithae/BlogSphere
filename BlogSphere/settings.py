@@ -65,7 +65,7 @@ ROOT_URLCONF = 'BlogSphere.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -206,3 +206,59 @@ SIMPLE_JWT = {
 
 #Silencing check in specific environments
 SILENCED_SYSTEM_CHECKS = ['blog_manager.E001']
+
+
+import os
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s',
+        },
+    },
+    "handlers": {
+        "info": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "log/info.log"),
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB
+            "backupCount": 3,
+            "formatter": "verbose",
+        },
+        "demo": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "log/demo.log"),
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB
+            "backupCount": 3,
+            "formatter": "verbose",
+        },
+        "city": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(BASE_DIR, "log/city.log"),
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB
+            "backupCount": 3,
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["info"],
+            "propagate": True,
+            "level": "INFO",
+        },
+        "demo_log": {
+            "handlers": ["demo"],
+            "propagate": True,
+            "level": "INFO",
+        },
+        "city_log": {
+            "handlers": ["city"],
+            "propagate": True,
+            "level": "ERROR",
+        },
+    },
+}

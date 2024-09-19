@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework import generics, filters
 from rest_framework.response import Response
 from rest_framework import status
@@ -28,6 +29,10 @@ from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from rest_framework.throttling import ScopedRateThrottle
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
+
+
+def index(request):
+    return render(request, 'blog_manager/index.html')
 
 class BlogPostPagination(PageNumberPagination):
     page_size = 10
@@ -153,6 +158,8 @@ class ReactionDetailView(generics.RetrieveDestroyAPIView):
         return obj
 
 
+
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [IsAuthenticated]
@@ -175,6 +182,31 @@ class RegisterView(generics.CreateAPIView):
     def perform_create(self, serializer):
         return serializer.save()
     
+import logging
+from django.contrib.auth import authenticate, login
+from django.http import JsonResponse
+from django.views import View
+
+# Configure your loggers
+logger_info = logging.getLogger('django')
+logger_city = logging.getLogger('city_log')
+
+class LoginView(View):
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        logger_info.info('Login attempt for user: %s', username)
+        
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            logger_info.info('User %s logged in successfully.', username)
+            return JsonResponse({'message': 'Login successful'}, status=200)
+        else:
+            logger_city.error('Login failed for user: %s', username)
+            return JsonResponse({'error': 'Invalid credentials'}, status=401)
+
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserProfileSerializer
@@ -201,6 +233,20 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         cache.set(cache_key, serializer.data, timeout=CACHE_TTL)
         print("DATA COMING FROM DB")
         return Response(serializer.data)
+    
+    def post(self, request, *args, **kwargs):
+        if self.get_object() is not None:
+            return Response({"detail": "User profile already exists."}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_profile = serializer.save(user=request.user)
+
+        cache_key = f"{settings.KEY_PREFIX}_user_profile_{self.request.user.id}"
+        cache.set(cache_key, serializer.data, timeout=CACHE_TTL)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
     def put(self, request, *args, **kwargs):
         cache_key = f"{settings.KEY_PREFIX}_user_profile_{self.request.user.id}"
@@ -211,7 +257,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(user_profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        # Invalidate cache after update
+        self.perform_update(serializer)        # Invalidate cache after update
         cache.delete(cache_key)
         return Response(serializer.data)
+    
+

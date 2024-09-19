@@ -8,10 +8,13 @@ from .views import (
     TagListView, 
     ReactionListCreateView, 
     ReactionDetailView, 
-    UserProfileView, 
+    UserProfileView,
+    LoginView, 
     RegisterView,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+
+from blog_manager import views
 
 
 urlpatterns = [
@@ -28,5 +31,5 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('userprofile/', UserProfileView.as_view(), name='userprofile'),
-    
+    path('login/', LoginView.as_view(), name='login'),    ###################################################
 ]
