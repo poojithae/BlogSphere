@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import BlogPost, Comment, Category, Tag, Reaction, UserProfile
+from django.contrib import messages
+from django.utils.translation import ngettext
 
 @admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
@@ -8,12 +10,29 @@ class BlogPostAdmin(admin.ModelAdmin):
     list_filter = ('author', 'category', 'created_at')
     ordering = ('-created_at',)
 
+
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('id', 'post', 'author', 'status', 'created_at')
     search_fields = ('content', 'author__username', 'post__title')
     list_filter = ('status', 'post', 'author')
     ordering = ('-created_at',)
+    actions = ["mark_approved"]
+
+    @admin.action(permissions=["change"])    
+    def mark_approved(self, request, queryset):
+        updated = queryset.update(status="approved")
+        self.message_user(
+            request,
+            ngettext(
+                "%d story was successfully marked as approved.",
+                "%d stories were successfully marked as approved.",
+                updated,
+            )
+            % updated,
+            messages.SUCCESS,
+        )
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

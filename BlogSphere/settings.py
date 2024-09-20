@@ -47,6 +47,16 @@ INSTALLED_APPS = [
     'blog_manager',
 ]
 
+SECURE_HSTS_SECONDS = 31536000  
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  
+SECURE_HSTS_PRELOAD = True  
+SECURE_SSL_REDIRECT = True
+SECURE_SSL_HOST = None 
+SECURE_REDIRECT_EXEMPT = []  
+SECURE_CONTENT_TYPE_NOSNIFF = True 
+SECURE_REFERRER_POLICY = 'no-referrer' 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin' 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -57,8 +67,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #'blog_manager.middleware.CustomMiddleware',
+    'middleware.custom.CustomMiddleware',
+    'middleware.auth_middleware.LoginRequiredMiddleware',
+    'middleware.auth_middleware.RemoteUserMiddleware',
+    'middleware.auth_middleware.PersistentRemoteUserMiddleware',
+    'middleware.cache.CacheMiddleware',
+    'middleware.security.SecurityMiddleware',
+
+
 ]
+LOGIN_URL = '/login/'  
 
 ROOT_URLCONF = 'BlogSphere.urls'
 
@@ -173,18 +191,15 @@ REST_FRAMEWORK = {
 
 #         #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
 #         #'LOCATION': 'cache_blogpost',
-
-
 #     }
 # }
-# CACHE_TTL = 60 * 15 
-# KEY_PREFIX = 'blog_app'
-# CACHE_MIDDLEWARE_ALIAS = 'default'  
-# CACHE_MIDDLEWARE_SECONDS = 60 * 10  
-# CACHE_MIDDLEWARE_KEY_PREFIX = '' 
 
-CACHE_TTL = 60 * 15
+CACHE_TTL = 60 * 15 
 KEY_PREFIX = 'blog_app'
+CACHE_MIDDLEWARE_ALIAS = 'default'  
+CACHE_MIDDLEWARE_SECONDS = 60 * 15  
+CACHE_MIDDLEWARE_KEY_PREFIX = 'blog_app' 
+
 
 CACHES = {
     "default": {
@@ -209,6 +224,7 @@ SILENCED_SYSTEM_CHECKS = ['blog_manager.E001']
 
 
 import os
+from django.conf import settings
 
 LOGGING = {
     "version": 1,
@@ -219,10 +235,14 @@ LOGGING = {
         },
     },
     "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose", 
+        },
         "info": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "log/info.log"),
+            "filename": os.path.join(settings.BASE_DIR, "log/info.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 3,
             "formatter": "verbose",
@@ -230,7 +250,7 @@ LOGGING = {
         "demo": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "log/demo.log"),
+            "filename": os.path.join(settings.BASE_DIR, "log/demo.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 3,
             "formatter": "verbose",
@@ -238,7 +258,7 @@ LOGGING = {
         "city": {
             "level": "ERROR",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "log/city.log"),
+            "filename": os.path.join(settings.BASE_DIR, "log/city.log"),
             "maxBytes": 5 * 1024 * 1024,  # 5 MB
             "backupCount": 3,
             "formatter": "verbose",
@@ -246,12 +266,12 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["info"],
+            "handlers": ["info", "console"],  
             "propagate": True,
             "level": "INFO",
         },
         "demo_log": {
-            "handlers": ["demo"],
+            "handlers": ["demo", "console"],  
             "propagate": True,
             "level": "INFO",
         },
@@ -259,6 +279,11 @@ LOGGING = {
             "handlers": ["city"],
             "propagate": True,
             "level": "ERROR",
+        },
+        "blog_manager.middleware": {  
+            "handlers": ["console"],
+            "level": "DEBUG",  
+            "propagate": False,  
         },
     },
 }
