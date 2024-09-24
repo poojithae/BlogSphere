@@ -18,12 +18,17 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+#from django.contrib.sitemaps.views import sitemap
+#from blog_manager import sitemaps
+#from blog_manager.sitemaps import PostSitemap
+
+#Sitemap = {'posts':PostSitemap}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('blog_manager.urls')),
     path('api-auth/', include('rest_framework.urls')),
-
+    #path('sitemap.xml', sitemap, {'sitemaps':sitemaps}, name= 'django.contrib.sitemaps.views.sitemap')
 ]
 
 if settings.DEBUG:  

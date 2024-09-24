@@ -1,5 +1,9 @@
-INFO 2024-09-20 19:17:36,047 basehttp 212 "GET /admin/ HTTP/1.1" 200 9836
-INFO 2024-09-20 19:24:25,427 autoreload 266 C:\Users\MinnuReddy\BlogSphere\BlogSphere\settings.py changed, reloading.
-INFO 2024-09-20 19:24:30,423 autoreload 668 Watching for file changes with StatReloader
-INFO 2024-09-20 19:24:34,037 autoreload 266 C:\Users\MinnuReddy\BlogSphere\BlogSphere\settings.py changed, reloading.
-INFO 2024-09-20 19:24:37,406 autoreload 668 Watching for file changes with StatReloader
+INFO 2024-09-24 18:37:00,796 basehttp 212 code 400, message Bad request version ('�mh�-O�\x01�R\x00')
+ERROR 2024-09-24 18:37:00,796 basehttp 192 You're accessing the development server over HTTPS, but it only supports HTTP.
+ERROR 2024-09-24 18:37:00,796 basehttp 192 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2024-09-24 18:48:00,896 basehttp 212 code 400, message Bad request version ('�k���\x87��]L\x07\x0e�)��nHX\x991PDXs�\x01�\x9d��˾\x8b\x16vGE%')
+ERROR 2024-09-24 18:48:00,896 basehttp 192 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2024-09-24 19:37:00,904 basehttp 212 code 400, message Bad request version ('��_`\x12N@?')
+ERROR 2024-09-24 19:37:00,960 basehttp 192 You're accessing the development server over HTTPS, but it only supports HTTP.
+INFO 2024-09-24 19:07:55,633 autoreload 266 C:\Users\MinnuReddy\BlogSphere\blog_manager\signals.py changed, reloading.
+INFO 2024-09-24 19:08:19,326 autoreload 668 Watching for file changes with StatReloader

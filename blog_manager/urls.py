@@ -9,13 +9,13 @@ from .views import (
     ReactionListCreateView, 
     ReactionDetailView, 
     UserProfileView,
-    LoginView, 
+    #LoginView, 
     RegisterView,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from blog_manager import views
-
+#from .feeds import LastPostFeed
 
 urlpatterns = [
     path('blogposts/', BlogPostListCreateView.as_view(), name='blogpost-list-create'),
@@ -31,5 +31,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('userprofile/', UserProfileView.as_view(), name='userprofile'),
-    path('login/', LoginView.as_view(), name='login'),    ###################################################
+    #path('login/', LoginView.as_view(), name='login'),
+    #path('feed/', LastPostFeed(), name='post_feed'),
 ]

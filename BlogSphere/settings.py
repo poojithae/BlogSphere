@@ -28,8 +28,7 @@ SECRET_KEY = 'django-insecure-mxt#t#d#reif1+3u%a2!nt-2*wr05adi@6bran+dn6gl#m&zx3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -45,37 +44,47 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'django_filters',
     'blog_manager',
+    #'django.contrib.site',
+    #'django.contrib.sitemaps',
 ]
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',  
+    'django.contrib.sessions.middleware.SessionMiddleware', 
+    'django.middleware.cache.UpdateCacheMiddleware',  
+    'django.middleware.common.CommonMiddleware',  
+    'django.middleware.cache.FetchFromCacheMiddleware', 
+    'django.middleware.csrf.CsrfViewMiddleware',  
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
+    'middleware.auth_middleware.LoginRequiredMiddleware',  
+    'middleware.auth_middleware.RemoteUserMiddleware',  
+    'middleware.auth_middleware.PersistentRemoteUserMiddleware', 
+    'middleware.custom.CustomMiddleware', 
+    'middleware.cache.CacheMiddleware',  
+]
+
+
 
 SECURE_HSTS_SECONDS = 31536000  
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  
 SECURE_HSTS_PRELOAD = True  
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = False
 SECURE_SSL_HOST = None 
 SECURE_REDIRECT_EXEMPT = []  
 SECURE_CONTENT_TYPE_NOSNIFF = True 
 SECURE_REFERRER_POLICY = 'no-referrer' 
-SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin' 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.cache.UpdateCacheMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'middleware.custom.CustomMiddleware',
-    'middleware.auth_middleware.LoginRequiredMiddleware',
-    'middleware.auth_middleware.RemoteUserMiddleware',
-    'middleware.auth_middleware.PersistentRemoteUserMiddleware',
-    'middleware.cache.CacheMiddleware',
-    'middleware.security.SecurityMiddleware',
+# # Security settings for HTTPS
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURE_SSL_REDIRECT = True  # Redirect all HTTP requests to HTTPS
+# SESSION_COOKIE_SECURE = True  # Use secure cookies
+# CSRF_COOKIE_SECURE = True      # Use secure CSRF cookies
 
 
-]
 LOGIN_URL = '/login/'  
 
 ROOT_URLCONF = 'BlogSphere.urls'

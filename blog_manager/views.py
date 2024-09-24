@@ -153,7 +153,6 @@ from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views import View
 
-# Configure your loggers
 logger_info = logging.getLogger('django')
 logger_city = logging.getLogger('city_log')
 

@@ -38,4 +38,3 @@ class CustomMiddleware(MiddlewareMixin):
     def process_exception(self, request, exception):
         print(f"Exception occurred: {exception}")
         return JsonResponse({'error': 'An internal error occurred. Please try again later.'}, status=500)     
-
